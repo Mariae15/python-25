@@ -27,7 +27,13 @@ while running:
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_LEFT]:
-        img_rect.x -=SPEED
+        img_rect.x -= SPEED
+    if keys[pygame.K_RIGHT]:
+        img_rect.x += SPEED
+    if keys[pygame.K_UP]:
+        img_rect.y -= SPEED
+    if keys[pygame.K_DOWN]:
+        img_rect.y += SPEED
 
     screen.fill(BG_COLOR)
 
