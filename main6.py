@@ -18,6 +18,16 @@ else:
     img = None
     img_rect = pygame.Rect(WIDTH // 2, HEIGHT // 2, 50, 50)
 
+    target_file = "patrick.png"
+    if os.path.exists(target_file):
+        target_img = pygame.image.load(target_file).convert_alpha()
+        target_rect = target_img.get_rect(center=(WIDTH // 2 + 200, HEIGHT))
+    else:
+        print("Imagem do alvo não encontrada!")
+        target_img = None
+        target_rect = pygame.Rect(WIDTH // 2 + 200, HEIGHT - 50, 50, 50)
+        
+
     background_file = "background.png"
     if os.path.exists(background_file):
         background_orig = pygame.image.load(background_file).convert()
@@ -27,15 +37,16 @@ else:
         background = None
         print("Imagem de fundo não encontrada!")
         
-SPEED = 2
-JUMP_STRENGTH = 30
-GRAVITY = 0.9
+SPEED = 3
+JUMP_STRENGTH = 18
+GRAVITY = 0.3
 JUMPING = False
 VELOCITY_Y = 0
 
-def centralize_image():
-    global img_rect, WIDTH, HEIGHT
-    img_rect.center = (WIDTH // 2, HEIGHT // 2)
+target_velocity_x = 0
+target_velocity_y = 0
+target_jumping = False
+target_gravity = GRAVITY
 
 last_width, last_height = WIDTH, HEIGHT
 
@@ -67,19 +78,47 @@ def update_jump():
             JUMPING = False
             VELOCITY_Y = 0
 
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+def update_target_physics():
+    global target_rect, target_velocity_x, target_velocity_y, target_jumping, target_gravity, WIDTH, HEIGHT
+    if target_jumping:
+        target_velocity_y += target_gravity
+        target_rect.y += target_velocity_y
+
+        if target_rect.bottom >= HEIGHT:
+            target_rect.bottom = HEIGHT
+            target_jumping = False
+            target_velocity_y = 0
+        else:
+            target_velocity_x *= 0.95
+
+
+def kick():    
+    global  target_velocity_x, target_velocity_y, target_jumping, target_rect, img_rect
+
+    dist_x = target_rect.centerx - img_rect.centerx
+    dist_y = target_rect.centery - img_rect.centery
+    distancia = (dist_x**2 + dist_y**2) ** 0.5
+
+    if distancia < 150:
+        target_velocity_x = 20 if dist_x > 0 else -20
+        target_velocity_y = -20
+        target_jumping = True
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
     current_width, current_height = screen.get_size()
 
 
-    if (current_width, current_height) != (last_width, last_height):
+    if current_width != last_width or current_height != last_height:
         WIDTH, HEIGHT = current_width, current_height
-        centralize_image()
-        last_width, last_height = current_width, current_height
+
+        img_rect.bottom = HEIGHT
+        target_rect.bottom = HEIGHT                                 
+                                    
         if background_orig:
             background = pygame.transform.scale(background_orig, (WIDTH, HEIGHT))
         last_width, last_height = current_width, current_height
@@ -98,10 +137,13 @@ while running:
 
     if keys[pygame.K_SPACE]:
         jump()
+    if keys[pygame.K_f]
 
-    limit_movement()
+    limit_movement(img_rect)
+    limit_movement(target_rect)
 
     update_jump()
+    update_target_physics()
 
     if background:
         screen.blit(background, (0, 0))
@@ -110,7 +152,14 @@ while running:
 
     if img:
         screen.blit(img, img_rect.topleft)
-
+    else:
+        pygame.draw.rect(screen, (255, 0, 0) img_rect)
+    
+    if target_img:
+        screen.blit(target_img, target_rect.topleft)
+    else:
+        pygame.draw.rect(screen, (0, 255, 0), target_rect)
+        
     pygame.display.flip()
 
 pygame.quit()
