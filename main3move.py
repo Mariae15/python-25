@@ -4,8 +4,8 @@ import os
 pygame.init()
 
 WIDTH, HEIGHT = 800, 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Janela com Imagem")
+screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame)
+pygame.display.set_caption("Mover Imagem com Setas")
 
 BG_COLOR = (30, 30, 40)
 
@@ -16,13 +16,28 @@ if os.path.exists(image_file):
 else:
     print("Imagem não enconrada!")
 
-SPEED = 1
+SPEED = 1 
+
+def centralize_image():
+    global img_rect, WIDTH, HEIGHT
+    img_rect.center = (WIDTH // 2, HEIGHT // 2)
+
+last_width, last_height = WIDTH, HEIGHT
 
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+    current_width, current_height = screen.get_size()
+
+
+    if (current_width, current_height) != (last_width, last_height):
+        WIDTH, HEIGHT = current_width, current_height
+        centralize_image()
+        last_width, last_height = current_width, current_height
+        
 
     keys = pygame.key.get_pressed()
 
